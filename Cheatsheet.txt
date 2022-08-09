@@ -1,0 +1,38 @@
+Create folder and db sub-folder
+Create schema.sql, see readme for fields
+Consider create seeds.sql with setup data to populate the tables
+mysql -u root -p load the schema.sql
+(use employee_db; select * from employee) to test
+Quit and Npm init to set up a new project
+npm i inquirer
+npm i mysql2
+Create server.js
+Consider creating menus modules with all the menu questions for MainMenu, Add Department, Add Role, Add Employee and Update Employee
+Consider creating database module with all the functions for: 
+	connect database
+	viewAllDepartments
+	viewAllRoles
+	viewAllEmployees
+	addDepartment
+	addRole
+	addEmployee
+	updateEmployeeRole
+In server.js import database, menus etc
+Start main question loop loading in Main Menu questions
+In Answers, create a switch statement, call each database function
+
+Example select statement with Promise: return (dbConn.promise().query(`SELECT * FROM role`));
+Example prepared insert statement with Promise:      return (dbConn.promise().query(INSERT INTO role SET ?, {title: title, salary: salary, department_id: department_id});
+Use console.table to output results. E.g
+
+ database.viewAllEmployees().then(([rows]) => {
+                    console.table(rows);
+                    console.log('\n');
+                    mainMenu();
+                });
+
+
+After each operation, call Main Menu function again to retrieve all menu options
+
+Nice to have. For Funk intro, look at examples of https://www.npmjs.com/package/asciiart-logo, google "asciiart-logo examples"
+
