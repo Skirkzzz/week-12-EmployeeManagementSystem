@@ -132,21 +132,45 @@ function viewEmployees() {
    function viewEmployeesByDepartment() {
     db.findAllDepartments()
     .then{([rows] => {
-        let departments- rows
-    })}
-   }    
-       
-       
+        let departments = rows;
         const departmentChoices = departments.map(({ id, name }) => ({
             name:name,
             value: id
         }));
-
         prompt([
             {
                 type: "list"
-                name: "departmentChoices"
+                name: "depatmentId",
+                message: "Which department would you like to see employees for?",
+                choices: departmentChoices
             }
         ])
-    }}
+        .then(res => db.findAllEmployeesByDepartment(res.departmentId))
+        .then({[rows]} => {
+            let employees = rows;
+            console.log("\n");
+            console.table(employees);
+        })
+    })}
+   }    
+       
+       
+// View all employees that report to a specific manager
+function viewEmployeesByManager() {
+    db.findAllEmployees()
+    .then(([rows]) => {
+        let managers = rows;
+        const managerChoices = managers.map(({ id, first_name, last_name}) => ({
+            name: `${first_name}` {last_name}
+        }))
+    });
 }
+
+//Remove a department
+removeDepartment(departmentId) {
+    return this.connection.promise().query(
+        "SELECT employee.id, employee.first_name, employee.last_name AS department, role.title"
+    )
+}
+
+module.exports = new db(connection);
