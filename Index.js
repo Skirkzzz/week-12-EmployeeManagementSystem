@@ -117,4 +117,36 @@ function loadMainPrompts() {
     }
 })
 
-//View 
+//View all employees
+function viewEmployees() {
+    db.findAllEmployees()
+    .then{([rows]) => {
+        let departments = rows;
+       console.log("\n");
+       console.table(employees);
+
+    })
+    .then{() => loadMainPrompts()};
+
+//View all employees that belong to a department
+   function viewEmployeesByDepartment() {
+    db.findAllDepartments()
+    .then{([rows] => {
+        let departments- rows
+    })}
+   }    
+       
+       
+        const departmentChoices = departments.map(({ id, name }) => ({
+            name:name,
+            value: id
+        }));
+
+        prompt([
+            {
+                type: "list"
+                name: "departmentChoices"
+            }
+        ])
+    }}
+}
