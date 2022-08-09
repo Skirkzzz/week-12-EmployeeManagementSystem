@@ -161,8 +161,20 @@ function viewEmployeesByManager() {
     .then(([rows]) => {
         let managers = rows;
         const managerChoices = managers.map(({ id, first_name, last_name}) => ({
-            name: `${first_name}` {last_name}
-        }))
+            name: `${first_name} {last_name}`,
+            value: id
+        }));
+prompt([
+    {
+        type: "list",
+        name: "managerId",
+        message: "which employee do you want to see direct reports for?",
+        choices: managerChoices
+    }
+])
+.then(res => db.findAllEmployeesByManager(res.managerId))
+
+
     });
 }
 
