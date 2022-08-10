@@ -173,7 +173,10 @@ prompt([
     }
 ])
 .then(res => db.findAllEmployeesByManager(res.managerId))
-
+.then({[rows]} => {
+    let employees = rows;
+    
+})
 
     });
 }
