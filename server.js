@@ -1,3 +1,6 @@
+const {connectMysql}
+
+
 const { prompt } = require("inquirer");
 const logo = require("asciiart-logo");
 const { inherits } = require("util");
