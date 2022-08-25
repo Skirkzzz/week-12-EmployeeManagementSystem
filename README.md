@@ -7,6 +7,9 @@ XXXXXXXX
 ##Portfolio
 ![Screenshot of Application!](/XXXXXX)
 
+##To deploy
+mysql -u root -p load the schema.sql
+
 ## Links To Repository
 
 - The URL of the deployed application.
