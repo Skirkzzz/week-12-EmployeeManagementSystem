@@ -7,7 +7,7 @@ const {
   createRole,
   createEmployee,
   updateEmployeeRole,
-} = require("./lib/menu-module");
+} = require("./lib/selections");
 
 function questionList() {
   const inquirer = require("inquirer");
