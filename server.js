@@ -1,3 +1,5 @@
+const inquirer = require("inquirer");
+
 const {
   sqlconnection,
   findAllDepartments,
@@ -7,78 +9,15 @@ const {
   createRole,
   createEmployee,
   updateEmployeeRole,
+  renderCompDepartments,
+  renderCompRoles,
+  renderCompEmployees,
 } = require("./lib/selections");
 
-function questionList() {
-  const inquirer = require("inquirer");
-  const compDepartments = [];
-  const compRoles = [];
-  const compEmployeeNames = [{ value: 0, name: "NONE" }];
-}
+// function init() {
+// }
 
-inquirer
-  .prompt([
-    {
-      type: "list",
-      name: "menu",
-      message: "SELECT AN OPTION TO CONTINUE:",
-      choices: [
-        "Find All Departments",
-        "Find All Roles",
-        "Find All Employees",
-        "Create Department",
-        "Create Role",
-        "Create Employee",
-        "Update Employee Role",
-        "Close",
-      ],
-    },
-  ])
-  .then((answer) => {
-    if (answer.menu == "Find All Departments") {
-      findAllDepartments().then(([rows]) => {
-        console.table(rows);
-        console.log("\n");
-        questionList();
-      });
-    }
-    if (answer.menu == "Find all Roles") {
-      findAllRoles().then(([rows]) => {
-        console.table(rows);
-        console.log("\n");
-        questionList();
-      });
-    }
-    if (answer.menu == "Find all Employees") {
-      findAllEmployees().then(([rows]) => {
-        console.table(rows);
-        console.log("\n");
-        questionList();
-      });
-    }
-    if (answer.menu == "Create Department") {
-      createDepartment();
-    }
-    if (answer.menu == "Create Role") {
-      renderCompanyDepartments();
-      createRole();
-    }
-    if (answer.menu == "Add new Employee") {
-      renderCompanyEmployees();
-      renderCompanyRoles();
-      createEmployee();
-    }
-    if (answer.menu == "Update Employee Role") {
-      rendercompEmployees();
-      rendercompRoles();
-      updateEmployeeRole();
-    }
-    if (answer.menu == "Close") {
-      process.exit();
-    }
-  });
-
-let createDepartment = () => {
+let createDept = async () => {
   inquirer
     .prompt([
       {
@@ -87,19 +26,19 @@ let createDepartment = () => {
         message: "Please enter the name of the new department",
       },
     ])
-
     .then((answers) => {
-      createDepartment(answers.new_department).then(
-        viewOurDepartments().then(([rows]) => {
+      createDepartment(answers.new_department).then(() => {
+        findAllDepartments().then(([rows]) => {
           console.table(rows);
           console.log("\n");
-          questionList();
-        })
-      );
+          init();
+        });
+      });
     });
 };
 
-let createRole = () => {
+let newRole = async () => {
+  let compDepartments = await renderCompDepartments();
   inquirer
     .prompt([
       {
@@ -121,20 +60,27 @@ let createRole = () => {
         choices: compDepartments,
       },
     ])
-    .then((answers) => {
-      db.query("SELECT * FROM department ", function (err, results) {
-        for (i = 0; i < results.length; i++) {
-          if (results[i].department_name == answers.add_department) {
-            department_id = results[i].id;
-            addRole(answers.new_role, answers.add_salary, department_id);
-            questionList();
-          }
-        }
-      });
+    .then(async (answers) => {
+      await createRole(
+        answers.new_role,
+        answers.add_salary,
+        answers.create_department
+      );
+      console.log(`${answers.new_role} added successfully!`);
+      await findAllRoles();
+      init();
     });
 };
 
-let createEmployee = () => {
+let newEmployee = async () => {
+  // const tempRoles = await renderCompRoles();
+  // console.log(tempRoles);
+  // process.exit();
+  // const tempEmployees = await renderCompEmployees();
+  // let compRoles = Object.values(tempRoles);
+  // let compEmployeeNames = Object.values(tempEmployees);
+  const compRoles = await renderCompRoles();
+  const compEmployeeNames = await renderCompEmployees();
   inquirer
     .prompt([
       {
@@ -164,26 +110,24 @@ let createEmployee = () => {
       },
     ])
     .then((answers) => {
-      addEmployee(
+      createEmployee(
         answers.add_new_firstname,
         answers.add_new_lastname,
         answers.add_newemployee_role,
         answers.add_newemployee_manager
       );
-
-      questionList();
+      console.log(
+        `${answers.add_new_firstname} ${answers.add_new_lastname} added successfully!`
+      );
+      init();
     });
 };
 
-let updateEmployeeSelection = () => {
+let updateEmployeeSelection = async () => {
+  const compRoles = await renderCompRoles();
+  const compEmployeeNames = await renderCompEmployees();
   inquirer
     .prompt([
-      {
-        type: "input",
-        name: "updated_credentials",
-        message: "Please enter the updated credentials",
-      },
-
       {
         type: "list",
         name: "employee_update",
@@ -203,55 +147,85 @@ let updateEmployeeSelection = () => {
       console.log(answers.role_update);
       console.log(answers.employee_update);
       updateEmployeeRole(answers.role_update, answers.employee_update);
-
-      questionList();
+      console.log(`Employee update successfully!`);
+      init();
     });
 };
 
-let renderCompDepartments = () => {
-  db.query("SELECT * FROM department ", function (err, results) {
-    for (i = 0; i < results.length; i++) {
-      compDepartments.push(results[i].department_name);
-    }
-  });
-};
+async function start() {
+  await sqlconnection();
+  // res = await findAllEmployees();
+  // console.log(res[0]);
+  // process.exit();
+  // findAllEmployees().then((res) => {
+  //   console.table(res[0]);
+  //   init();
+  // });
+  await init();
+  // const res = await renderCompEmployees();
+  // console.log(typeof res);
+}
 
-let renderCompRoles = () => {
-  db.query(
-    "SELECT id as value, title as name FROM employee_role ",
-    function (err, results) {
-      let renderList = [];
+async function init() {
+  // init();
+  const answer = await inquirer.prompt([
+    {
+      type: "list",
+      name: "menu",
+      message: "SELECT AN OPTION TO CONTINUE:",
+      choices: [
+        "Find All Departments",
+        "Find All Roles",
+        "Find All Employees",
+        "Create Department",
+        "Create Role",
+        "Create Employee",
+        "Update Employee Role",
+        "Close",
+      ],
+    },
+  ]);
 
-      for (i = 0; i < results.length; i++) {
-        renderList.push(results[i]);
-      }
+  if (answer.menu == "Find All Departments") {
+    findAllDepartments().then(([rows]) => {
+      console.table(rows);
+      console.log("\n");
+      init();
+    });
+  }
+  if (answer.menu == "Find All Roles") {
+    findAllRoles().then((res) => {
+      console.table(res[0]);
+      init();
+    });
+  }
+  if (answer.menu == "Find All Employees") {
+    findAllEmployees().then((res) => {
+      console.table(res[0]);
+      init();
+    });
+  }
+  if (answer.menu == "Create Department") {
+    createDept();
+  }
+  if (answer.menu == "Create Role") {
+    // renderCompanyDepartments();
+    newRole();
+  }
+  if (answer.menu == "Create Employee") {
+    // renderCompanyEmployees();
+    // renderCompanyRoles();
+    newEmployee();
+  }
+  if (answer.menu == "Update Employee Role") {
+    // rendercompEmployees();
+    // rendercompRoles();
+    updateEmployeeSelection();
+  }
+  if (answer.menu == "Close") {
+    console.log("yupppp");
+    process.exit();
+  }
+}
 
-      for (i = 0; i < results.length; i++) {
-        let renderName = renderList.pop();
-        compRoles.push(renderName);
-      }
-    }
-  );
-};
-
-let renderCompEmployees = () => {
-  db.query(
-    "SELECT id as value, CONCAT(first_name, ' ', last_name) as name FROM employee",
-    function (err, results) {
-      let renderList = [];
-
-      for (i = 0; i < results.length; i++) {
-        renderList.push(results[i]);
-      }
-
-      for (i = 0; i < results.length; i++) {
-        let renderName = renderList.pop();
-        compEmployeeNames.push(renderName);
-      }
-    }
-  );
-};
-
-sqlconnection();
-
-questionList();
+start();
