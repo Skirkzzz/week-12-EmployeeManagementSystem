@@ -11,7 +11,7 @@ This repository contains the code for a content management system, using Node.js
 
 ##To deploy
 NPM i
-my sql.server start || mysql -u root
+mysql.server start || mysql -u root
 source db/schema.sql
 Quit (command/control 'c')
 
